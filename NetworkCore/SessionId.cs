@@ -21,5 +21,15 @@ namespace NetworkCore
         public uint Id { get; private set; } = IdGenerator<T>.Generate();
 
         public UniqueId() { }
+
+        public static implicit operator uint(UniqueId<T> uniqueId)
+        {
+            return uniqueId.Id;
+        }
+
+        public static implicit operator UniqueId<T>(uint id)
+        {
+            return new UniqueId<T> { Id = id };
+        }
     }
 }

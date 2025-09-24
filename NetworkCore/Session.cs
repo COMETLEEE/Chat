@@ -1,5 +1,6 @@
 ﻿using System.Buffers.Binary;
 using System.Net.Sockets;
+using System.Threading.Channels;
 
 namespace NetworkCore
 {
@@ -9,8 +10,9 @@ namespace NetworkCore
         private NetworkStream? _networkStream;
         private RecvBuffer _recvBuffer;
         private int _isClosed = 0;
+        private Channel<(PacketType, byte[])> _recvQueue = Channel.CreateUnbounded<(PacketType, byte[])>();
 
-        private bool IsClosed => _isClosed != 0;
+        public bool IsClosed => _isClosed != 0;
 
         public UniqueId<Session> SessionId { get; private set; }
         
@@ -31,6 +33,9 @@ namespace NetworkCore
 
         public async Task RunAsync()
         {
+            // OnRecv() 콜백이 RunAsync() 와 별도의 태스크에서 실행되도록
+            _ = ProcessRecvQueueAsync();
+
             try
             {
                 while (!IsClosed)
@@ -46,13 +51,13 @@ namespace NetworkCore
                         short type = BinaryPrimitives.ReadInt16LittleEndian(_recvBuffer.ReadSpan.Slice(0, 2));
                         short length = BinaryPrimitives.ReadInt16LittleEndian(_recvBuffer.ReadSpan.Slice(2, 2));
 
-                        // 패킷 한 덩어리가 아직 완전히 도착하지 않은 경우
-                        // TCP 의 경우 스트림 순서가 보장되기 때문에 이후 도착할 데이터를 기다리기만 하면 됨
+                        // 패킷 한 묶음이 아직 완전히 도착하지 않은 경우
                         if (_recvBuffer.DataSize < length + 4)
                             break;
 
                         byte[] body = _recvBuffer.ReadSpan.Slice(4, length).ToArray();
-                        await OnRecv((PacketType)type, body);
+
+                        await _recvQueue.Writer.WriteAsync(((PacketType)type, body));
 
                         _recvBuffer.OnRead(length + 4);
                         _recvBuffer.Clear();
@@ -65,16 +70,17 @@ namespace NetworkCore
             }
             catch (Exception e)
             {
-                // RunAsync 실행 중간 예외가 발생한 경우
-                // E.X.) 다른 쓰레드에서 DisconnectAsync() 호출, ...
+                // RunAsync 실행 중간에 예외가 발생한 경우
+                // E.X.) 다른 쓰레드에서 DisconnectAsync() 호출 (정상 종료), ...
                 Console.WriteLine($"[Session] RunAsync Exception: {e.ToString()}");
             }
             finally
             {
                 _networkStream?.Close();
                 _tcpClient?.Close();
-                _isClosed = 1;
+                _recvQueue.Writer.Complete();
 
+                SetClosed();
                 OnDisconnected();
             }
         }
@@ -142,6 +148,14 @@ namespace NetworkCore
         protected abstract Task OnRecv(PacketType type, byte[] body);
         protected abstract void OnDisconnected();
         protected abstract void OnSend(int numOfBytes);
+
+        private async Task ProcessRecvQueueAsync()
+        {
+            await foreach (var (type, body) in _recvQueue.Reader.ReadAllAsync())
+            {
+                await OnRecv(type, body);
+            }
+        }
 
         private void SetClosed() => Interlocked.Exchange(ref _isClosed, 1);
     }

@@ -4,8 +4,6 @@ namespace ChatClient
 {
     internal class ChatClient
     {
-        private static bool s_isRunning = true;
-
         static async Task Main(string[] args)
         {
             Console.WriteLine("------ Start ChatClient------");
@@ -39,10 +37,22 @@ namespace ChatClient
             ServerSession session = new ServerSession(tcpClient);
 
             Task networkTask = session.RunAsync();
-            
-            Console.WriteLine("------ End ChatClient ------");
 
-            networkTask.Wait();
+            Input input = new Input(session);
+
+            Task inputTask = input.RunAsync();
+
+            // 콘솔 창이 닫히거나 프로그램이 종료된 경우 대비
+            AppDomain.CurrentDomain.ProcessExit += (s, e) =>
+            {
+                byte[] disconMessage = System.Text.Encoding.UTF8.GetBytes("CLIENT PROCESS EXIT");
+
+                session.DisconnectAsync(NetworkCore.PacketType.EXIT_REQ, disconMessage).Wait();
+            };
+
+            await Task.WhenAll(networkTask, inputTask);
+
+            Console.WriteLine("------ End ChatClient ------");
         }
     }
 }

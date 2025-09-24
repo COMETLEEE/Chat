@@ -10,13 +10,13 @@ namespace ChatServer
 {
     internal class Room
     {
-        public Room()
-        {
-
-        }
-
-        List<ClientSession> ClientSessions = new List<ClientSession>();
+        private string _roomName;
 
         public UniqueId<Room> RoomId { get; private set; }
+        
+        public Room(string roomName)
+        {
+            _roomName = roomName;
+        }
     }
 }

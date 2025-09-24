@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace ChatServer
@@ -31,7 +32,18 @@ namespace ChatServer
         {
             switch (type)
             {
-                
+                case PacketType.CREATE_ROOM_REQ:
+                    {
+                        string message = System.Text.Encoding.UTF8.GetString(body);
+
+                        string roomName = string.Empty;
+
+                        if (false == string.IsNullOrEmpty(message))
+                            roomName = message;
+
+                        RoomManager.Instance.CreateRoom(roomName);
+                    }
+                    break;
             }
 
             return Task.CompletedTask;
