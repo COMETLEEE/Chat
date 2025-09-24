@@ -130,6 +130,7 @@ namespace NetworkCore
                     // 정리
                     _networkStream?.Close();
                     _tcpClient?.Close();
+                    _recvQueue.Writer.Complete();
                 }
             }
             catch (Exception e)
