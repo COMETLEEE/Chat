@@ -34,7 +34,7 @@ namespace ChatClient
 
                 if (line.StartsWith("/quit"))
                 {
-                    await _session.DisconnectAsync(NetworkCore.PacketType.EXIT_REQ, Encoding.UTF8.GetBytes("CLIENT INPUT EXIT"));
+                    await _session.DisconnectAsync((short)Packet.PacketType.CreateRoomReq, Encoding.UTF8.GetBytes("CLIENT INPUT EXIT"));
                     break;
                 }
 

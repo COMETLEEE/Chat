@@ -10,7 +10,7 @@ namespace NetworkCore
         private NetworkStream? _networkStream;
         private RecvBuffer _recvBuffer;
         private int _isClosed = 0;
-        private Channel<(PacketType, byte[])> _recvQueue = Channel.CreateUnbounded<(PacketType, byte[])>();
+        private Channel<(short, byte[])> _recvQueue = Channel.CreateUnbounded<(short, byte[])>();
 
         public bool IsClosed => _isClosed != 0;
 
@@ -33,7 +33,7 @@ namespace NetworkCore
 
         public async Task RunAsync()
         {
-            // OnRecv() 콜백이 RunAsync() 와 별도의 태스크에서 실행되도록
+            // OnRecv() 콜백이 (콘텐츠 로직) RunAsync() 와 별도의 태스크에서 실행되도록
             _ = ProcessRecvQueueAsync();
 
             try
@@ -57,7 +57,7 @@ namespace NetworkCore
 
                         byte[] body = _recvBuffer.ReadSpan.Slice(4, length).ToArray();
 
-                        await _recvQueue.Writer.WriteAsync(((PacketType)type, body));
+                        await _recvQueue.Writer.WriteAsync((type, body));
 
                         _recvBuffer.OnRead(length + 4);
                         _recvBuffer.Clear();
@@ -85,11 +85,11 @@ namespace NetworkCore
             }
         }
 
-        public async Task SendAsync(PacketType type, byte[] body)
+        public async Task SendAsync(short type, byte[] body)
         {
             byte[] packet = new byte[4 + body.Length];
 
-            BinaryPrimitives.WriteInt16LittleEndian(packet.AsSpan(0, 2), (short)type);
+            BinaryPrimitives.WriteInt16LittleEndian(packet.AsSpan(0, 2), type);
             BinaryPrimitives.WriteInt16LittleEndian(packet.AsSpan(2, 2), (short)body.Length);
             Array.Copy(body, 0, packet, 4, body.Length);
 
@@ -105,7 +105,7 @@ namespace NetworkCore
             }
         }
 
-        public async Task DisconnectAsync(PacketType type, byte[] body)
+        public async Task DisconnectAsync(short type, byte[] body)
         {
             try
             {
@@ -146,7 +146,7 @@ namespace NetworkCore
         }
 
         protected abstract void OnConnected();
-        protected abstract Task OnRecv(PacketType type, byte[] body);
+        protected abstract Task OnRecv(short type, byte[] body);
         protected abstract void OnDisconnected();
         protected abstract void OnSend(int numOfBytes);
 

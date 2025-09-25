@@ -25,7 +25,7 @@ namespace ChatClient
             Console.WriteLine($"[ServerSession] OnDisconnected: {SessionId.Id}");
         }
 
-        protected override Task OnRecv(NetworkCore.PacketType type, byte[] body)
+        protected override Task OnRecv(short type, byte[] body)
         {
             switch (type)
             {

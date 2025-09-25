@@ -28,11 +28,13 @@ namespace ChatServer
             Console.WriteLine($"[ClientSession] OnDisconnected: {SessionId.Id}");
         }
 
-        protected override Task OnRecv(PacketType type, byte[] body)
+        protected override Task OnRecv(short type, byte[] body)
         {
-            switch (type)
+            Packet.PacketType packetType = (Packet.PacketType)type;
+
+            switch (packetType)
             {
-                case PacketType.CREATE_ROOM_REQ:
+                case Packet.PacketType.CreateRoomReq:
                     {
                         string message = System.Text.Encoding.UTF8.GetString(body);
 

@@ -1,0 +1,9 @@
+<Packets>
+    <Packet name = "CreateRoomReq" id = "1001">
+        <Field name="roomName" type="string" />
+    </Packet>
+    <Packet name = "CreateRoomRes" id = "1002">
+        <Field name="result" type="byte"/>
+        <Field name="roomNumber" type="uint"/>
+    </Packet> 
+</Packets>

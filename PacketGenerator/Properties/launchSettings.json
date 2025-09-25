@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "PacketGenerator": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\github\\Chat\\Common\\PacketDef.xml C:\\github\\Chat\\ChatServer\\Packet.cs C:\\github\\Chat\\ChatClient\\Packet.cs"
+    }
+  }
+}
