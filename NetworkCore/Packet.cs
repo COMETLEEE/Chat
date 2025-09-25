@@ -16,19 +16,6 @@ namespace NetworkCore
         EXIT_REQ = 100,
     }
 
-    //[StructLayout(LayoutKind.Sequential, Pack = 1)]
-    //public struct CreateRoomReq
-    //{
-    //    fixed byte roomName[64];
-    //}
-
-    //[StructLayout(LayoutKind.Sequential, Pack = 1)]
-    //public struct CreateRoomRes
-    //{
-    //    bool isSuccess;
-    //    uint roomId;
-    //}
-
     public static class PacketSerializer
     {
         private const int _headerSize = 4; // 2 bytes for size, 2 bytes for type
