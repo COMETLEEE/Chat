@@ -7,6 +7,13 @@ namespace PacketGenerator
 {
     internal class PacketGenerator
     {
+        static private Dictionary<string, string> s_defaultInitialize = new Dictionary<string, string>
+        {
+            { "string", "string.Empty" }
+            , { "byte[]", "Array.Empty<byte>()"}
+            , { "List<string>", "new List<string>()"}
+        };
+
         static void Main(string[] args)
         {
             if (args.Length < 2)
@@ -23,6 +30,9 @@ namespace PacketGenerator
             PacketFile? packetFile = serializer.Deserialize(reader) as PacketFile;
 
             Generate(packetFile!, args.Skip(1).ToArray());
+
+            Console.WriteLine($"- 패킷 생성이 완료되었습니다.");
+            Console.WriteLine($"- 생성된 총 패킷 개수 : {packetFile?.Packets.Count}");
         }
 
         public static void Generate(PacketFile packetFile, string[] outputFilePaths)
@@ -54,7 +64,14 @@ namespace PacketGenerator
                 sb.AppendLine("    {");
                 foreach (var field in packet.Fields)
                 {
-                    sb.AppendLine($"        public {field.Type} {field.Name} {{ get; set; }}");
+                    if (s_defaultInitialize.ContainsKey(field.Type) == true)
+                    {
+                        sb.AppendLine($"        public {field.Type} {field.Name} {{ get; set; }} = {s_defaultInitialize[field.Type]};");
+                    }
+                    else
+                    {
+                        sb.AppendLine($"        public {field.Type} {field.Name} {{ get; set; }}");
+                    }
                 }
                 sb.AppendLine("    }");
                 sb.AppendLine();
@@ -113,6 +130,7 @@ namespace PacketGenerator
             "bool" => $"reader.ReadBool();",
             "string" => $"reader.ReadString();",
             "byte[]" => $"reader.ReadBytes();",
+            "List<string>" => $"reader.ReadStrings();",
             _ => throw new Exception($"Unknown type: {type}")
         };
     }

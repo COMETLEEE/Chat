@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Packet;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace ChatClient
@@ -51,15 +53,39 @@ namespace ChatClient
 
         private async Task ProcessLobbyAsync(string line)
         {
-            if (line.StartsWith('/'))
+            if (line.StartsWith("//"))
             {
-                
+                string[] parts = line.Split(' ');
+
+                if (string.Equals(parts[0], "//createRoom", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (parts.Length > 1)
+                    {
+                        CreateRoomReq createRoomReq = new CreateRoomReq() { roomName = parts[1] };
+                        await _session.SendAsync((short)PacketType.CreateRoomReq, PacketSerializer.Serialize(createRoomReq));
+                    }
+                    else
+                    {
+                        Console.WriteLine("방 생성 명령을 실행할 때, 방 이름을 추가로 입력하세요.");
+                    }
+                }
+                else if (string.Equals(parts[0], "//roomList", StringComparison.OrdinalIgnoreCase))
+                {
+                    await _session.SendAsync((short)PacketType.RoomListReq, PacketSerializer.Serialize(new RoomListReq()));
+                }
+            }
+            else
+            {
+                Console.WriteLine("로비에서는 명령어만 입력할 수 있습니다.");
             }
         }
 
         private async Task ProcessRoomAsync(string line)
         {
-            
+            if (line.StartsWith("//"))
+            {
+
+            }
         }
     }
 }

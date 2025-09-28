@@ -47,5 +47,12 @@ namespace NetworkCore
             _binaryWriter.Write((short)value.Length);
             _binaryWriter.Write(value.ToArray());
         }
+        public void Write(List<string> value)
+        {
+            _binaryWriter.Write((short)value.Count);
+
+            foreach (var item in value)
+                _binaryWriter.Write(item);
+        }
     }
 }

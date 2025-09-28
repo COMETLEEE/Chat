@@ -12,8 +12,12 @@ namespace ChatServer
     {
         private string _roomName;
 
-        public UniqueId<Room> RoomId { get; private set; }
+        private UniqueId<Room> _roomId = new UniqueId<Room>();
+
+        public uint RoomId => _roomId.Id;
         
+        public string RoomName => _roomName;
+
         public Room(string roomName)
         {
             _roomName = roomName;

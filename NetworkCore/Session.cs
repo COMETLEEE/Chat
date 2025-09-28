@@ -14,7 +14,7 @@ namespace NetworkCore
 
         public bool IsClosed => _isClosed != 0;
 
-        public UniqueId<Session> SessionId { get; private set; }
+        public UniqueId<Session> SessionId { get; private set; } = new UniqueId<Session>();
         
         public Session(TcpClient tcpClient)
         {

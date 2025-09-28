@@ -40,5 +40,19 @@ namespace NetworkCore
             short length = _binaryReader.ReadInt16();
             return ReadBytes(length);
         }
+        public List<string> ReadStrings()
+        {
+            short length = _binaryReader.ReadInt16();
+
+            List<string> strings = new List<string>(length);
+
+            for (int i = 0; i <length; i++)
+            {
+                string s = _binaryReader.ReadString();
+                strings.Add(s);
+            }
+
+            return strings;
+        }
     }
 }

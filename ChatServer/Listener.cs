@@ -13,7 +13,7 @@ namespace ChatServer
 
         public Listener(ServerConfig serverConfig)
         {
-            _tcpListener = new TcpListener(System.Net.IPAddress.Any, 8888);
+            _tcpListener = new TcpListener(System.Net.IPAddress.Any, serverConfig.ListenPort);
         }
 
         public void Start()

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Packet;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -27,9 +28,34 @@ namespace ChatClient
 
         protected override Task OnRecv(short type, byte[] body)
         {
-            switch (type)
-            {
+            Packet.PacketType packetType = (Packet.PacketType)type;
 
+            switch (packetType)
+            {
+                case PacketType.CreateRoomRes:
+                    {
+                        CreateRoomRes createRoomRes = PacketSerializer.Deserialize_CreateRoomRes(body);
+
+                        if (createRoomRes.result != 0)
+                        {
+                            Console.WriteLine($"룸 생성에 성공하였습니다. ROOM ID - {createRoomRes.roomId}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"룸 생성에 실패하였습니다.");
+                        }
+                    }
+                    break;
+
+                case PacketType.RoomListRes:
+                    {
+                        RoomListRes roomListRes = PacketSerializer.Deserialize_RoomListRes(body);
+
+                        Console.WriteLine("=============== 현재 방 정보 ===============");
+                        roomListRes.roomList.ForEach((st) => { Console.WriteLine(st); });
+                        Console.WriteLine("==========================================");
+                    }
+                    break;
             }
 
             return Task.CompletedTask;

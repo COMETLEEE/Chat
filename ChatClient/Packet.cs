@@ -4,21 +4,32 @@ using NetworkCore;
 
 namespace Packet
 {
-    public enum PacketType
+    public enum PacketType : short
     {
         CreateRoomReq = 1001,
         CreateRoomRes = 1002,
+        RoomListReq = 1003,
+        RoomListRes = 1004,
     }
 
     public class CreateRoomReq
     {
-        public string roomName { get; set; }
+        public string roomName { get; set; } = string.Empty;
     }
 
     public class CreateRoomRes
     {
         public byte result { get; set; }
-        public uint roomNumber { get; set; }
+        public uint roomId { get; set; }
+    }
+
+    public class RoomListReq
+    {
+    }
+
+    public class RoomListRes
+    {
+        public List<string> roomList { get; set; } = new List<string>();
     }
 
     public static class PacketSerializer
@@ -41,7 +52,7 @@ namespace Packet
         {
             PacketWriter writer = new PacketWriter();
             writer.Write(packet.result);
-            writer.Write(packet.roomNumber);
+            writer.Write(packet.roomId);
             return writer.ToArray();
         }
 
@@ -50,7 +61,33 @@ namespace Packet
             CreateRoomRes packet = new CreateRoomRes();
             PacketReader reader = new PacketReader(data);
             packet.result = reader.ReadByte();;
-            packet.roomNumber = reader.ReadUInt32();;
+            packet.roomId = reader.ReadUInt32();;
+            return packet;
+        }
+        public static byte[] Serialize(RoomListReq packet)
+        {
+            PacketWriter writer = new PacketWriter();
+            return writer.ToArray();
+        }
+
+        public static RoomListReq Deserialize_RoomListReq(byte[] data)
+        {
+            RoomListReq packet = new RoomListReq();
+            PacketReader reader = new PacketReader(data);
+            return packet;
+        }
+        public static byte[] Serialize(RoomListRes packet)
+        {
+            PacketWriter writer = new PacketWriter();
+            writer.Write(packet.roomList);
+            return writer.ToArray();
+        }
+
+        public static RoomListRes Deserialize_RoomListRes(byte[] data)
+        {
+            RoomListRes packet = new RoomListRes();
+            PacketReader reader = new PacketReader(data);
+            packet.roomList = reader.ReadStrings();;
             return packet;
         }
     }

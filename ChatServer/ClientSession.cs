@@ -1,4 +1,5 @@
 ﻿using NetworkCore;
+using Packet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,6 +7,8 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+
+using Packet;
 
 namespace ChatServer
 {
@@ -28,27 +31,39 @@ namespace ChatServer
             Console.WriteLine($"[ClientSession] OnDisconnected: {SessionId.Id}");
         }
 
-        protected override Task OnRecv(short type, byte[] body)
+        protected override async Task OnRecv(short type, byte[] body)
         {
-            Packet.PacketType packetType = (Packet.PacketType)type;
+            PacketType packetType = (Packet.PacketType)type;
 
             switch (packetType)
             {
-                case Packet.PacketType.CreateRoomReq:
+                case PacketType.CreateRoomReq:
                     {
-                        string message = System.Text.Encoding.UTF8.GetString(body);
+                        CreateRoomReq createRoomReq = PacketSerializer.Deserialize_CreateRoomReq(body);
+                        Room room = RoomManager.Instance.CreateRoom(createRoomReq.roomName);
 
-                        string roomName = string.Empty;
+                        CreateRoomRes createRoomRes = new CreateRoomRes() { result = 1, roomId = room.RoomId };
 
-                        if (false == string.IsNullOrEmpty(message))
-                            roomName = message;
+                        // 논리적 패킷 전송 순서가 보장되어야 하므로 기다린다.
+                        await SendAsync((short)PacketType.CreateRoomRes, PacketSerializer.Serialize(createRoomRes));
+                    }
+                    break;
 
-                        RoomManager.Instance.CreateRoom(roomName);
+                case PacketType.RoomListReq:
+                    {
+                        Dictionary<UniqueId<Room>, Room> rooms = RoomManager.Instance.Rooms;
+
+                        RoomListRes roomListRes = new RoomListRes();
+
+                        foreach (var room in rooms.Values)
+                        {
+                            roomListRes.roomList.Add($"> {room.RoomId} - {room.RoomName}");
+                        }
+
+                        await SendAsync((short)PacketType.RoomListRes, PacketSerializer.Serialize(roomListRes));
                     }
                     break;
             }
-
-            return Task.CompletedTask;
         }
 
         protected override void OnSend(int numOfBytes)

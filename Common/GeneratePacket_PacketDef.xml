@@ -4,6 +4,11 @@
     </Packet>
     <Packet name = "CreateRoomRes" id = "1002">
         <Field name="result" type="byte"/>
-        <Field name="roomNumber" type="uint"/>
+        <Field name="roomId" type="uint"/>
     </Packet> 
+    <Packet name = "RoomListReq" id = "1003" >
+    </Packet>
+    <Packet name = "RoomListRes" id = "1004" >
+        <Field name="roomList" type="List&lt;string&gt;"/> 
+    </Packet>
 </Packets>
