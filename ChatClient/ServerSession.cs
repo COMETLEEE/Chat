@@ -117,7 +117,7 @@ namespace ChatClient
 
         protected override void OnSend(int numOfBytes)
         {
-            Console.WriteLine($"[ServerSession] OnSend: {SessionId}, {numOfBytes} bytes");
+            // Console.WriteLine($"[ServerSession] OnSend: {SessionId}, {numOfBytes} bytes");
         }
     }
 }

@@ -55,8 +55,6 @@ namespace ChatClient
             // 콘솔 창이 닫히거나 프로그램이 종료된 경우 대비
             AppDomain.CurrentDomain.ProcessExit += (s, e) =>
             {
-                byte[] disconMessage = System.Text.Encoding.UTF8.GetBytes("CLIENT PROCESS EXIT");
-
                 session.Disconnect();
             };
 

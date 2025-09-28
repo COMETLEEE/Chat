@@ -21,7 +21,8 @@ namespace ChatClient
         {
             while (false == _session.IsClosed)
             {
-                string? line = Console.ReadLine();
+                string? line = await Console.In.ReadLineAsync();
+                
                 if (true == string.IsNullOrEmpty(line))
                     continue;
 
