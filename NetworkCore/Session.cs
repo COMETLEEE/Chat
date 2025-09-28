@@ -78,7 +78,7 @@ namespace NetworkCore
             {
                 _networkStream?.Close();
                 _tcpClient?.Close();
-                _recvQueue.Writer.Complete();
+                _recvQueue.Writer.TryComplete();
 
                 SetClosed();
                 OnDisconnected();
@@ -107,15 +107,12 @@ namespace NetworkCore
             }
         }
 
-        public async Task DisconnectAsync(short type, byte[] body)
+        public void Disconnect()
         {
             try
             {
                 if (true == _tcpClient?.Connected)
                 {
-                    // 연결 종료 사유 패킷 전송
-                    await SendAsync(type, body);
-
                     // 연결 상태 플래그 미리 Off
                     SetClosed();
 
@@ -132,12 +129,12 @@ namespace NetworkCore
                     // 정리
                     _networkStream?.Close();
                     _tcpClient?.Close();
-                    _recvQueue.Writer.Complete();
+                    _recvQueue.Writer.TryComplete();
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine($"[Session] DisconnectAsync Exception: {e.ToString}");
+                Console.WriteLine($"[Session] Disconnect Exception: {e.ToString}");
             }
             finally
             {

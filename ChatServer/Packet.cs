@@ -6,16 +6,28 @@ namespace Packet
 {
     public enum PacketType : short
     {
-        CreateRoomReq = 1001,
-        CreateRoomRes = 1002,
-        RoomListReq = 1003,
-        RoomListRes = 1004,
-        RoomEnterReq = 1005,
-        RoomEnterRes = 1006,
-        ChatReq = 1007,
-        ChatRes = 1008,
-        RoomInfoNoti = 2001,
-        ChatDataNoti = 2002,
+        DisconnectReq = 1000,
+        DisconnectRes = 1001,
+        CreateRoomReq = 1002,
+        CreateRoomRes = 1003,
+        RoomListReq = 1004,
+        RoomListRes = 1005,
+        RoomEnterReq = 1006,
+        RoomEnterRes = 1007,
+        ChatReq = 1008,
+        ChatRes = 1009,
+        RoomInfoNoti = 2000,
+        ChatDataNoti = 2001,
+    }
+
+    public class DisconnectReq
+    {
+        public uint disconnectReason { get; set; }
+    }
+
+    public class DisconnectRes
+    {
+        public uint disconnectReason { get; set; }
     }
 
     public class CreateRoomReq
@@ -73,6 +85,34 @@ namespace Packet
 
     public static class PacketSerializer
     {
+        public static byte[] Serialize(DisconnectReq packet)
+        {
+            PacketWriter writer = new PacketWriter();
+            writer.Write(packet.disconnectReason);
+            return writer.ToArray();
+        }
+
+        public static DisconnectReq Deserialize_DisconnectReq(byte[] data)
+        {
+            DisconnectReq packet = new DisconnectReq();
+            PacketReader reader = new PacketReader(data);
+            packet.disconnectReason = reader.ReadUInt32();;
+            return packet;
+        }
+        public static byte[] Serialize(DisconnectRes packet)
+        {
+            PacketWriter writer = new PacketWriter();
+            writer.Write(packet.disconnectReason);
+            return writer.ToArray();
+        }
+
+        public static DisconnectRes Deserialize_DisconnectRes(byte[] data)
+        {
+            DisconnectRes packet = new DisconnectRes();
+            PacketReader reader = new PacketReader(data);
+            packet.disconnectReason = reader.ReadUInt32();;
+            return packet;
+        }
         public static byte[] Serialize(CreateRoomReq packet)
         {
             PacketWriter writer = new PacketWriter();

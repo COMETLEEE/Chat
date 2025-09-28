@@ -25,13 +25,14 @@ namespace ChatClient
                 if (true == string.IsNullOrEmpty(line))
                     continue;
 
-                if (line.StartsWith("//quit"))
+                if (line.StartsWith("//exit"))
                 {
-                    await _session.DisconnectAsync((short)Packet.PacketType.CreateRoomReq, Encoding.UTF8.GetBytes("CLIENT INPUT EXIT"));
-                    break;
-                }
+                    Console.WriteLine("채팅 클라이언트를 종료합니다.");
 
-                if (ChatClient.ClientState == ClientState.Lobby)
+                    DisconnectReq disconnectReq = new DisconnectReq() { disconnectReason = 0 };
+                    await _session.SendAsync((short)Packet.PacketType.DisconnectReq, PacketSerializer.Serialize(disconnectReq));
+                }
+                else if (ChatClient.ClientState == ClientState.Lobby)
                 {
                     await ProcessLobbyAsync(line);
                 }

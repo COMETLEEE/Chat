@@ -40,6 +40,17 @@ namespace ChatServer
 
             switch (packetType)
             {
+                case PacketType.DisconnectReq:
+                    {
+                        DisconnectReq disconnectReq = PacketSerializer.Deserialize_DisconnectReq(body);
+                        
+                        // 여기서 방의 다른 인원들에게 알리기 ..? 보다는 OnDisconnected 가 맞을 것 같다.
+
+                        DisconnectRes disconnectRes = new DisconnectRes() { disconnectReason = disconnectReq.disconnectReason };
+                        await SendAsync((short)PacketType.DisconnectRes, PacketSerializer.Serialize(disconnectRes));
+                    }
+                    break;
+
                 case PacketType.CreateRoomReq:
                     {
                         CreateRoomReq createRoomReq = PacketSerializer.Deserialize_CreateRoomReq(body);
@@ -102,7 +113,6 @@ namespace ChatServer
                         {
                             ChatDataNoti chatDataNoti = new ChatDataNoti() { senderId = this.SessionId, chatData = chatReq.chatData };
 
-                            // Broadcast
                             foreach (var session in CurrentRoom?.Sessions!)
                             {
                                 // 여기서 각 Session 의 SendAsync 에 대해 기다릴 필요는 없다.

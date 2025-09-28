@@ -57,7 +57,7 @@ namespace ChatClient
             {
                 byte[] disconMessage = System.Text.Encoding.UTF8.GetBytes("CLIENT PROCESS EXIT");
 
-                session.DisconnectAsync((short)Packet.PacketType.CreateRoomReq, disconMessage).Wait();
+                session.Disconnect();
             };
 
             await Task.WhenAll(networkTask, inputTask);

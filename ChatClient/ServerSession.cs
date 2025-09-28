@@ -32,6 +32,16 @@ namespace ChatClient
 
             switch (packetType)
             {
+                case PacketType.DisconnectRes:
+                    {
+                        DisconnectRes disconnectRes = PacketSerializer.Deserialize_DisconnectRes(body);
+
+                        Console.WriteLine($"서버와의 연결을 종료합니다. 종료 코드 - {disconnectRes.disconnectReason}");
+
+                        Disconnect();
+                    }
+                    break;
+
                 case PacketType.CreateRoomRes:
                     {
                         CreateRoomRes createRoomRes = PacketSerializer.Deserialize_CreateRoomRes(body);
