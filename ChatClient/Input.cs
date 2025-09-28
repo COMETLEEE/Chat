@@ -8,12 +8,6 @@ using System.Threading.Tasks;
 
 namespace ChatClient
 {
-    enum InputState : byte
-    {
-        Lobby,
-        Room
-    }
-
     internal class Input
     {
         private ServerSession _session;
@@ -21,10 +15,7 @@ namespace ChatClient
         public Input(ServerSession session)
         {
             _session = session;
-            _inputState = InputState.Lobby;
         }
-
-        private InputState _inputState;
 
         public async Task RunAsync()
         {
@@ -34,17 +25,17 @@ namespace ChatClient
                 if (true == string.IsNullOrEmpty(line))
                     continue;
 
-                if (line.StartsWith("/quit"))
+                if (line.StartsWith("//quit"))
                 {
                     await _session.DisconnectAsync((short)Packet.PacketType.CreateRoomReq, Encoding.UTF8.GetBytes("CLIENT INPUT EXIT"));
                     break;
                 }
 
-                if (_inputState == InputState.Lobby)
+                if (ChatClient.ClientState == ClientState.Lobby)
                 {
                     await ProcessLobbyAsync(line);
                 }
-                else if (_inputState == InputState.Room)
+                else if (ChatClient.ClientState == ClientState.Room)
                 {
                     await ProcessRoomAsync(line);
                 }
@@ -57,7 +48,7 @@ namespace ChatClient
             {
                 string[] parts = line.Split(' ');
 
-                if (string.Equals(parts[0], "//createRoom", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(parts[0], "//roomCreate", StringComparison.OrdinalIgnoreCase))
                 {
                     if (parts.Length > 1)
                     {
@@ -73,6 +64,27 @@ namespace ChatClient
                 {
                     await _session.SendAsync((short)PacketType.RoomListReq, PacketSerializer.Serialize(new RoomListReq()));
                 }
+                else if (string.Equals(parts[0], "//roomEnter", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (parts.Length > 1)
+                    {
+                        uint roomId = 0;
+
+                        if (uint.TryParse(parts[1], out roomId))
+                        {
+                            RoomEnterReq roomEnterReq = new RoomEnterReq() { roomId = roomId };
+                            await _session.SendAsync((short)PacketType.RoomEnterReq, PacketSerializer.Serialize(roomEnterReq));
+                        }
+                        else
+                        {
+                            Console.WriteLine("적합한 형태의 방 번호를 입력하세요.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("방 입장 명령을 실행할 때, 방 번호를 추가로 입력하세요.");
+                    }
+                }
             }
             else
             {
@@ -85,6 +97,11 @@ namespace ChatClient
             if (line.StartsWith("//"))
             {
 
+            }
+            else
+            {
+                ChatReq chatReq = new ChatReq() { chatData = line };
+                await _session.SendAsync((short)PacketType.ChatReq, PacketSerializer.Serialize(chatReq));
             }
         }
     }

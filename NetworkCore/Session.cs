@@ -6,6 +6,7 @@ namespace NetworkCore
 {
     public abstract class Session
     {
+        private UniqueId<Session> _sessionId = new UniqueId<Session>();
         private TcpClient? _tcpClient;
         private NetworkStream? _networkStream;
         private RecvBuffer _recvBuffer;
@@ -13,9 +14,8 @@ namespace NetworkCore
         private Channel<(short, byte[])> _recvQueue = Channel.CreateUnbounded<(short, byte[])>();
 
         public bool IsClosed => _isClosed != 0;
+        public uint SessionId => _sessionId.Id;
 
-        public UniqueId<Session> SessionId { get; private set; } = new UniqueId<Session>();
-        
         public Session(TcpClient tcpClient)
         {
             if (false == tcpClient.Connected)
@@ -85,6 +85,8 @@ namespace NetworkCore
             }
         }
 
+        // 각 세션 별 논리적으로 패킷 전송 순서가 보장되어야 하므로
+        // 외부에서 사용 시 대부분 'await' 가 필요하다.
         public async Task SendAsync(short type, byte[] body)
         {
             byte[] packet = new byte[4 + body.Length];

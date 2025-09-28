@@ -54,5 +54,19 @@ namespace NetworkCore
 
             return strings;
         }
+        public List<uint> ReadUInt32s()
+        {
+            short length = _binaryReader.ReadInt16();
+
+            List<uint> uints = new List<uint>(length);
+
+            for (int i = 0; i <length; i++)
+            {
+                uint u = _binaryReader.ReadUInt32();
+                uints.Add(u);
+            }
+
+            return uints;
+        }
     }
 }

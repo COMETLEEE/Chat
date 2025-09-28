@@ -10,6 +10,12 @@ namespace Packet
         CreateRoomRes = 1002,
         RoomListReq = 1003,
         RoomListRes = 1004,
+        RoomEnterReq = 1005,
+        RoomEnterRes = 1006,
+        ChatReq = 1007,
+        ChatRes = 1008,
+        RoomInfoNoti = 2001,
+        ChatDataNoti = 2002,
     }
 
     public class CreateRoomReq
@@ -30,6 +36,39 @@ namespace Packet
     public class RoomListRes
     {
         public List<string> roomList { get; set; } = new List<string>();
+    }
+
+    public class RoomEnterReq
+    {
+        public uint roomId { get; set; }
+    }
+
+    public class RoomEnterRes
+    {
+        public byte result { get; set; }
+    }
+
+    public class ChatReq
+    {
+        public string chatData { get; set; } = string.Empty;
+    }
+
+    public class ChatRes
+    {
+        public byte result { get; set; }
+    }
+
+    public class RoomInfoNoti
+    {
+        public uint roomId { get; set; }
+        public List<uint> memberIds { get; set; } = new List<uint>();
+        public List<string> memberNames { get; set; } = new List<string>();
+    }
+
+    public class ChatDataNoti
+    {
+        public uint senderId { get; set; }
+        public string chatData { get; set; } = string.Empty;
     }
 
     public static class PacketSerializer
@@ -88,6 +127,96 @@ namespace Packet
             RoomListRes packet = new RoomListRes();
             PacketReader reader = new PacketReader(data);
             packet.roomList = reader.ReadStrings();;
+            return packet;
+        }
+        public static byte[] Serialize(RoomEnterReq packet)
+        {
+            PacketWriter writer = new PacketWriter();
+            writer.Write(packet.roomId);
+            return writer.ToArray();
+        }
+
+        public static RoomEnterReq Deserialize_RoomEnterReq(byte[] data)
+        {
+            RoomEnterReq packet = new RoomEnterReq();
+            PacketReader reader = new PacketReader(data);
+            packet.roomId = reader.ReadUInt32();;
+            return packet;
+        }
+        public static byte[] Serialize(RoomEnterRes packet)
+        {
+            PacketWriter writer = new PacketWriter();
+            writer.Write(packet.result);
+            return writer.ToArray();
+        }
+
+        public static RoomEnterRes Deserialize_RoomEnterRes(byte[] data)
+        {
+            RoomEnterRes packet = new RoomEnterRes();
+            PacketReader reader = new PacketReader(data);
+            packet.result = reader.ReadByte();;
+            return packet;
+        }
+        public static byte[] Serialize(ChatReq packet)
+        {
+            PacketWriter writer = new PacketWriter();
+            writer.Write(packet.chatData);
+            return writer.ToArray();
+        }
+
+        public static ChatReq Deserialize_ChatReq(byte[] data)
+        {
+            ChatReq packet = new ChatReq();
+            PacketReader reader = new PacketReader(data);
+            packet.chatData = reader.ReadString();;
+            return packet;
+        }
+        public static byte[] Serialize(ChatRes packet)
+        {
+            PacketWriter writer = new PacketWriter();
+            writer.Write(packet.result);
+            return writer.ToArray();
+        }
+
+        public static ChatRes Deserialize_ChatRes(byte[] data)
+        {
+            ChatRes packet = new ChatRes();
+            PacketReader reader = new PacketReader(data);
+            packet.result = reader.ReadByte();;
+            return packet;
+        }
+        public static byte[] Serialize(RoomInfoNoti packet)
+        {
+            PacketWriter writer = new PacketWriter();
+            writer.Write(packet.roomId);
+            writer.Write(packet.memberIds);
+            writer.Write(packet.memberNames);
+            return writer.ToArray();
+        }
+
+        public static RoomInfoNoti Deserialize_RoomInfoNoti(byte[] data)
+        {
+            RoomInfoNoti packet = new RoomInfoNoti();
+            PacketReader reader = new PacketReader(data);
+            packet.roomId = reader.ReadUInt32();;
+            packet.memberIds = reader.ReadUInt32s();;
+            packet.memberNames = reader.ReadStrings();;
+            return packet;
+        }
+        public static byte[] Serialize(ChatDataNoti packet)
+        {
+            PacketWriter writer = new PacketWriter();
+            writer.Write(packet.senderId);
+            writer.Write(packet.chatData);
+            return writer.ToArray();
+        }
+
+        public static ChatDataNoti Deserialize_ChatDataNoti(byte[] data)
+        {
+            ChatDataNoti packet = new ChatDataNoti();
+            PacketReader reader = new PacketReader(data);
+            packet.senderId = reader.ReadUInt32();;
+            packet.chatData = reader.ReadString();;
             return packet;
         }
     }

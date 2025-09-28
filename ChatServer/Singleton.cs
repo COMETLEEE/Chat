@@ -15,5 +15,4 @@ namespace ChatServer
 
         protected Singleton() { }
     }
-
 }

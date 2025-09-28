@@ -2,8 +2,18 @@
 
 namespace ChatClient
 {
+    enum ClientState : byte
+    {
+        Lobby,
+        Room
+    }
+
     internal class ChatClient
     {
+        private static ClientState _clientState = ClientState.Lobby;
+
+        public static ClientState ClientState { get { return _clientState; } set { _clientState = value; } }
+
         static async Task Main(string[] args)
         {
             Console.WriteLine("------ Start ChatClient------");

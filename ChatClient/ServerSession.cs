@@ -17,13 +17,13 @@ namespace ChatClient
 
         protected override void OnConnected()
         {
-            Console.WriteLine($"[ServerSession] OnConnected: {SessionId.Id}");
+            Console.WriteLine($"[ServerSession] OnConnected: {SessionId}");
             Console.WriteLine("- 명령어를 입력하세요.");
         }
 
         protected override void OnDisconnected()
         {
-            Console.WriteLine($"[ServerSession] OnDisconnected: {SessionId.Id}");
+            Console.WriteLine($"[ServerSession] OnDisconnected: {SessionId}");
         }
 
         protected override Task OnRecv(short type, byte[] body)
@@ -53,7 +53,51 @@ namespace ChatClient
 
                         Console.WriteLine("=============== 현재 방 정보 ===============");
                         roomListRes.roomList.ForEach((st) => { Console.WriteLine(st); });
-                        Console.WriteLine("==========================================");
+                        Console.WriteLine("===========================================");
+                    }
+                    break;
+
+                case PacketType.RoomEnterRes:
+                    {
+                        RoomEnterRes roomEnterRes = PacketSerializer.Deserialize_RoomEnterRes(body);
+
+                        if (roomEnterRes.result != 0)
+                        {
+                            Console.WriteLine($"룸 입장에 성공하였습니다. ");
+
+                            ChatClient.ClientState = ClientState.Room;
+                        }
+                        else
+                        {
+                            Console.WriteLine($"룸 입장에 실패하였습니다.");
+                        }
+                    }
+                    break;
+
+                case PacketType.ChatRes:
+                    {
+                        ChatRes chatRes = PacketSerializer.Deserialize_ChatRes(body);
+
+                        if (chatRes.result == 0)
+                        {
+                            Console.WriteLine("채팅 전송에 실패하였습니다.");
+                        }
+                    }
+                    break;
+
+                case PacketType.RoomInfoNoti:
+                    {
+                        RoomInfoNoti roomInfoNoti = PacketSerializer.Deserialize_RoomInfoNoti(body);
+
+                        // 방 정보 계속 갱신
+                    }
+                    break;
+
+                case PacketType.ChatDataNoti:
+                    {
+                        ChatDataNoti chatDataNoti = PacketSerializer.Deserialize_ChatDataNoti(body);
+
+                        Console.WriteLine($"{chatDataNoti.senderId} : {chatDataNoti.chatData}");
                     }
                     break;
             }
@@ -63,7 +107,7 @@ namespace ChatClient
 
         protected override void OnSend(int numOfBytes)
         {
-            Console.WriteLine($"[ServerSession] OnSend: {SessionId.Id}, {numOfBytes} bytes");
+            Console.WriteLine($"[ServerSession] OnSend: {SessionId}, {numOfBytes} bytes");
         }
     }
 }

@@ -21,7 +21,7 @@ namespace ChatServer
 
             if (false == _sessions.TryAdd(clientSession.SessionId, clientSession))
             {
-                Console.WriteLine($"[SessionManager] RegisterClient() failed. SessionId: {clientSession.SessionId.Id}");
+                Console.WriteLine($"[SessionManager] RegisterClient() failed. SessionId: {clientSession.SessionId}");
 
                 return null;
             }

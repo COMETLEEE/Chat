@@ -13,7 +13,7 @@ namespace NetworkCore
 
         public PacketWriter()
         {
-            // memory pool 사용 고려
+            // TODO : 메모리 풀 및 재사용 고려
             _memoryStream = new MemoryStream();
             _binaryWriter = new BinaryWriter(_memoryStream, Encoding.UTF8, true);
         }
@@ -48,6 +48,13 @@ namespace NetworkCore
             _binaryWriter.Write(value.ToArray());
         }
         public void Write(List<string> value)
+        {
+            _binaryWriter.Write((short)value.Count);
+
+            foreach (var item in value)
+                _binaryWriter.Write(item);
+        }
+        public void Write(List<uint> value)
         {
             _binaryWriter.Write((short)value.Count);
 

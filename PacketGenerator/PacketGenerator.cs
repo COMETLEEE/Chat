@@ -10,8 +10,9 @@ namespace PacketGenerator
         static private Dictionary<string, string> s_defaultInitialize = new Dictionary<string, string>
         {
             { "string", "string.Empty" }
-            , { "byte[]", "Array.Empty<byte>()"}
-            , { "List<string>", "new List<string>()"}
+            , { "byte[]", "Array.Empty<byte>()" }
+            , { "List<string>", "new List<string>()" }
+            , { "List<uint>", "new List<uint>()" }
         };
 
         static void Main(string[] args)
@@ -118,19 +119,20 @@ namespace PacketGenerator
         private static string MapReader(string type, string field)
         => type switch
         {
-            "byte" => $"reader.ReadByte();",
-            "short" => $"reader.ReadInt16();",
-            "ushort" => $"reader.ReadUInt16();",
-            "int" => $"reader.ReadInt32();",
-            "uint" => $"reader.ReadUInt32();",
-            "long" => $"reader.ReadInt64();",
-            "ulong" => $"reader.ReadUInt64();",
-            "float" => $"reader.ReadFloat();",
-            "double" => $"reader.ReadDouble();",
-            "bool" => $"reader.ReadBool();",
-            "string" => $"reader.ReadString();",
-            "byte[]" => $"reader.ReadBytes();",
-            "List<string>" => $"reader.ReadStrings();",
+            "byte" => "reader.ReadByte();",
+            "short" => "reader.ReadInt16();",
+            "ushort" => "reader.ReadUInt16();",
+            "int" => "reader.ReadInt32();",
+            "uint" => "reader.ReadUInt32();",
+            "long" => "reader.ReadInt64();",
+            "ulong" => "reader.ReadUInt64();",
+            "float" => "reader.ReadFloat();",
+            "double" => "reader.ReadDouble();",
+            "bool" => "reader.ReadBool();",
+            "string" => "reader.ReadString();",
+            "byte[]" => "reader.ReadBytes();",
+            "List<string>" => "reader.ReadStrings();",
+            "List<uint>" => "reader.ReadUInt32s();",
             _ => throw new Exception($"Unknown type: {type}")
         };
     }

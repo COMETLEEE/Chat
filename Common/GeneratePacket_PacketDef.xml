@@ -11,4 +11,30 @@
     <Packet name = "RoomListRes" id = "1004" >
         <Field name="roomList" type="List&lt;string&gt;"/> 
     </Packet>
+    <Packet name = "RoomEnterReq" id = "1005">
+        <Field name="roomId" type="uint"/>
+    </Packet>
+    <Packet name = "RoomEnterRes" id = "1006">
+        <Field name="result" type="byte"/>
+    </Packet>
+    <Packet name = "ChatReq" id = "1007">
+        <Field name="chatData" type="string"/>
+    </Packet>
+    <Packet name ="ChatRes" id = "1008">
+        <Field name="result" type="byte"/>
+    </Packet>
+
+
+
+
+
+    <Packet name ="RoomInfoNoti" id = "2001">
+        <Field name="roomId" type="uint"/>
+        <Field name="memberIds" type="List&lt;uint&gt;"/>
+        <Field name="memberNames" type="List&lt;string&gt;"/>
+    </Packet>
+    <Packet name ="ChatDataNoti" id = "2002">
+        <Field name="senderId" type="uint"/>
+        <Field name="chatData" type="string"/>
+    </Packet>
 </Packets>
