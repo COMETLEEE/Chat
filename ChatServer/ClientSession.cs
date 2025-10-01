@@ -18,7 +18,7 @@ namespace ChatServer
 
         public ClientSession(TcpClient tcpClient) : base(tcpClient)
         {
-            
+
         }
 
         protected override void OnConnected()
@@ -36,99 +36,7 @@ namespace ChatServer
 
         protected override async Task OnRecv(short type, byte[] body)
         {
-            PacketType packetType = (Packet.PacketType)type;
-
-            switch (packetType)
-            {
-                case PacketType.DisconnectReq:
-                    {
-                        DisconnectReq disconnectReq = PacketSerializer.Deserialize_DisconnectReq(body);
-                        
-                        // 여기서 방의 다른 인원들에게 알리기 ..? 보다는 OnDisconnected 가 맞을 것 같다.
-
-                        DisconnectRes disconnectRes = new DisconnectRes() { disconnectReason = disconnectReq.disconnectReason };
-                        await SendAsync((short)PacketType.DisconnectRes, PacketSerializer.Serialize(disconnectRes));
-                    }
-                    break;
-
-                case PacketType.CreateRoomReq:
-                    {
-                        CreateRoomReq createRoomReq = PacketSerializer.Deserialize_CreateRoomReq(body);
-                        Room room = RoomManager.Instance.CreateRoom(createRoomReq.roomName);
-
-                        CreateRoomRes createRoomRes = new CreateRoomRes() { result = 1, roomId = room.RoomId };
-
-                        await SendAsync((short)PacketType.CreateRoomRes, PacketSerializer.Serialize(createRoomRes));
-                    }
-                    break;
-
-                case PacketType.RoomListReq:
-                    {
-                        RoomListRes roomListRes = new RoomListRes();
-
-                        Dictionary<UniqueId<Room>, Room> rooms = RoomManager.Instance.Rooms;
-
-                        foreach (var room in rooms.Values)
-                        {
-                            roomListRes.roomList.Add($"{room.RoomId} - {room.RoomName}");
-                        }
-
-                        await SendAsync((short)PacketType.RoomListRes, PacketSerializer.Serialize(roomListRes));
-                    }
-                    break;
-
-                case PacketType.RoomEnterReq:
-                    {
-                        RoomEnterReq roomEnterReq = PacketSerializer.Deserialize_RoomEnterReq(body);
-
-                        Room? room = RoomManager.Instance.GetRoom(roomEnterReq.roomId);
-
-                        byte result = 0;
-
-                        if (room != null)
-                        {
-                            CurrentRoom = room;
-                            room.AddSession(this);
-                            result = 1;
-                        }
-                        else
-                        {
-                            Console.WriteLine($"해당 번호의 방이 존재하지 않아 들어갈 수 없습니다.");
-                            Console.WriteLine($"SESSION ID - {this.SessionId} / REQUESTED ROOM ID - {roomEnterReq.roomId}");
-                        }
-
-                        RoomEnterRes roomEnterRes = new RoomEnterRes();
-                        roomEnterRes.result = result;
-                        await SendAsync((short)PacketType.RoomEnterRes, PacketSerializer.Serialize(roomEnterRes));
-                    }
-                    break;
-
-                case PacketType.ChatReq:
-                    {
-                        ChatReq chatReq = PacketSerializer.Deserialize_ChatReq(body);
-
-                        ChatRes chatRes = new ChatRes() { result = 1 };
-
-                        if (CurrentRoom != null)
-                        {
-                            ChatDataNoti chatDataNoti = new ChatDataNoti() { senderId = this.SessionId, chatData = chatReq.chatData };
-
-                            foreach (var session in CurrentRoom?.Sessions!)
-                            {
-                                // 여기서 각 Session 의 SendAsync 에 대해 기다릴 필요는 없다.
-                                // 만약, 추가적인 예외 처리가 필요하다면 Task.Run 으로 래핑해서 사용하면 된다.
-                                _ = session.SendAsync((short)PacketType.ChatDataNoti, PacketSerializer.Serialize(chatDataNoti));
-                            }
-                        }
-                        else
-                        {
-                            chatRes.result = 0;
-                        }
-
-                        await SendAsync((short)PacketType.ChatRes, PacketSerializer.Serialize(chatRes));
-                    }
-                    break;
-            }
+            await PacketHandler.HandlePacket(this, (Packet.PacketType)type, body);
         }
 
         protected override void OnSend(int numOfBytes)
